@@ -1,24 +1,26 @@
-[
-  {
-    "id": "project-placeholder-1",
-    "title": "Cross-Platform Mobile App",
-    "summary": "A production-ready mobile application built with Kotlin Multiplatform, sharing business logic between Android and iOS.",
-    "category": "Mobile Development",
-    "tags": ["Kotlin Multiplatform", "Jetpack Compose", "SwiftUI", "SQLDelight"],
-    "imagePath": null,
-    "problem": "Need to maintain separate codebases for Android and iOS with duplicate business logic.",
-    "solution": "Implemented shared Kotlin Multiplatform architecture with platform-specific UI layers.",
-    "impact": "Reduced development time by 40% and improved consistency across platforms.",
-    "metrics": [
-      {
-        "label": "Code Sharing",
-        "value": "60%"
-      },
-      {
-        "label": "Development Time",
-        "value": "-40%"
-      }
-    ],
-    "externalUrl": null
-  }
-]
+{
+  "projects": [
+    {
+      "id": "project-placeholder-1",
+      "title": "Cross-Platform Mobile App",
+      "summary": "A production-ready mobile application built with Kotlin Multiplatform, sharing business logic between Android and iOS.",
+      "category": "Mobile Development",
+      "tags": ["Kotlin Multiplatform", "Jetpack Compose", "SwiftUI", "SQLDelight"],
+      "imagePath": null,
+      "problem": "Need to maintain separate codebases for Android and iOS with duplicate business logic.",
+      "solution": "Implemented shared Kotlin Multiplatform architecture with platform-specific UI layers.",
+      "impact": "Reduced development time by 40% and improved consistency across platforms.",
+      "metrics": [
+        {
+          "label": "Code Sharing",
+          "value": "60%"
+        },
+        {
+          "label": "Development Time",
+          "value": "-40%"
+        }
+      ],
+      "externalUrl": null
+    }
+  ]
+}

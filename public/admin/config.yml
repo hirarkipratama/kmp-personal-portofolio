@@ -1,0 +1,139 @@
+backend:
+  name: github
+  repo: owner/repo-name
+  branch: main
+
+media_folder: "public/images"
+public_folder: "/images"
+
+collections:
+  - name: "site"
+    label: "Site Content"
+    files:
+      - label: "Site Information"
+        name: "site"
+        file: "content/site.json"
+        format: "json"
+        fields:
+          - label: "Identity"
+            name: "identity"
+            widget: "object"
+            fields:
+              - {label: "Name", name: "name", widget: "string"}
+              - {label: "Role", name: "role", widget: "string"}
+              - {label: "Email", name: "email", widget: "string", required: false}
+          - label: "Hero"
+            name: "hero"
+            widget: "object"
+            fields:
+              - {label: "Headline", name: "headline", widget: "string"}
+              - {label: "Summary", name: "summary", widget: "text"}
+              - {label: "Technologies", name: "technologies", widget: "list", default: []}
+              - {label: "Profile Image Path", name: "profileImagePath", widget: "string", required: false}
+          - label: "Metrics"
+            name: "metrics"
+            widget: "list"
+            required: false
+            fields:
+              - {label: "Label", name: "label", widget: "string"}
+              - {label: "Value", name: "value", widget: "string"}
+              - {label: "Description", name: "description", widget: "string", required: false}
+          - label: "Footer"
+            name: "footer"
+            widget: "object"
+            fields:
+              - {label: "Copyright", name: "copyright", widget: "string"}
+              - {label: "Back to Top Label", name: "backToTopLabel", widget: "string", default: "Back to top"}
+
+  - name: "projects"
+    label: "Projects"
+    files:
+      - label: "Projects List"
+        name: "projects"
+        file: "content/projects.json"
+        format: "json"
+        fields:
+          - label: "Projects"
+            name: "projects"
+            widget: "list"
+            fields:
+              - {label: "ID", name: "id", widget: "string"}
+              - {label: "Title", name: "title", widget: "string"}
+              - {label: "Summary", name: "summary", widget: "text"}
+              - {label: "Category", name: "category", widget: "string"}
+              - {label: "Tags", name: "tags", widget: "list", default: []}
+              - {label: "Image Path", name: "imagePath", widget: "image", required: false}
+              - {label: "Problem", name: "problem", widget: "text", required: false}
+              - {label: "Solution", name: "solution", widget: "text", required: false}
+              - {label: "Impact", name: "impact", widget: "text", required: false}
+              - label: "Metrics"
+                name: "metrics"
+                widget: "list"
+                required: false
+                fields:
+                  - {label: "Label", name: "label", widget: "string"}
+                  - {label: "Value", name: "value", widget: "string"}
+              - {label: "External URL", name: "externalUrl", widget: "string", required: false}
+
+  - name: "skills"
+    label: "Skills"
+    files:
+      - label: "Skill Groups"
+        name: "skills"
+        file: "content/skills.json"
+        format: "json"
+        fields:
+          - label: "Skill Groups"
+            name: "skillGroups"
+            widget: "list"
+            fields:
+              - {label: "Category", name: "category", widget: "string"}
+              - label: "Skills"
+                name: "skills"
+                widget: "list"
+                fields:
+                  - {label: "Name", name: "name", widget: "string"}
+                  - {label: "Description", name: "description", widget: "string", required: false}
+
+  - name: "experience"
+    label: "Experience"
+    files:
+      - label: "Work Experience"
+        name: "experience"
+        file: "content/experience.json"
+        format: "json"
+        fields:
+          - label: "Experience"
+            name: "experience"
+            widget: "list"
+            fields:
+              - {label: "ID", name: "id", widget: "string"}
+              - {label: "Role", name: "role", widget: "string"}
+              - {label: "Organization", name: "organization", widget: "string"}
+              - {label: "Location", name: "location", widget: "string", required: false}
+              - label: "Work Mode"
+                name: "workMode"
+                widget: "select"
+                options: ["REMOTE", "HYBRID", "ONSITE"]
+                required: false
+              - {label: "Start Date", name: "startDate", widget: "string"}
+              - {label: "End Date", name: "endDate", widget: "string", required: false}
+              - {label: "Current Position", name: "current", widget: "boolean", default: false}
+              - {label: "Achievements", name: "achievements", widget: "list", default: []}
+              - {label: "Technologies", name: "technologies", widget: "list", default: []}
+
+  - name: "links"
+    label: "Social Links"
+    files:
+      - label: "Links"
+        name: "links"
+        file: "content/links.json"
+        format: "json"
+        fields:
+          - label: "Social Links"
+            name: "socialLinks"
+            widget: "list"
+            fields:
+              - {label: "Platform", name: "platform", widget: "string"}
+              - {label: "URL", name: "url", widget: "string"}
+              - {label: "Label", name: "label", widget: "string"}

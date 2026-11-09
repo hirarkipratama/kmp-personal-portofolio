@@ -1,46 +1,48 @@
-[
-  {
-    "id": "exp-1",
-    "role": "Senior Mobile Developer",
-    "organization": "Technology Company",
-    "location": "Remote",
-    "workMode": "REMOTE",
-    "startDate": "2022-01",
-    "endDate": null,
-    "current": true,
-    "achievements": [
-      "Led migration to Kotlin Multiplatform architecture, reducing codebase by 40%",
-      "Implemented shared business logic layer across Android and iOS platforms",
-      "Mentored junior developers on KMP best practices and architecture patterns"
-    ],
-    "technologies": [
-      "Kotlin Multiplatform",
-      "Jetpack Compose",
-      "SwiftUI",
-      "Ktor",
-      "SQLDelight"
-    ]
-  },
-  {
-    "id": "exp-2",
-    "role": "Mobile Developer",
-    "organization": "Previous Company",
-    "location": "City, Country",
-    "workMode": "HYBRID",
-    "startDate": "2019-06",
-    "endDate": "2021-12",
-    "current": false,
-    "achievements": [
-      "Built and shipped native Android applications with 100K+ downloads",
-      "Implemented offline-first architecture with Room database",
-      "Improved app performance by 30% through optimization and profiling"
-    ],
-    "technologies": [
-      "Kotlin",
-      "Android SDK",
-      "MVVM",
-      "Room",
-      "Retrofit"
-    ]
-  }
-]
+{
+  "experience": [
+    {
+      "id": "exp-1",
+      "role": "Senior Mobile Developer",
+      "organization": "Technology Company",
+      "location": "Remote",
+      "workMode": "REMOTE",
+      "startDate": "2022-01",
+      "endDate": null,
+      "current": true,
+      "achievements": [
+        "Led migration to Kotlin Multiplatform architecture, reducing codebase by 40%",
+        "Implemented shared business logic layer across Android and iOS platforms",
+        "Mentored junior developers on KMP best practices and architecture patterns"
+      ],
+      "technologies": [
+        "Kotlin Multiplatform",
+        "Jetpack Compose",
+        "SwiftUI",
+        "Ktor",
+        "SQLDelight"
+      ]
+    },
+    {
+      "id": "exp-2",
+      "role": "Mobile Developer",
+      "organization": "Previous Company",
+      "location": "City, Country",
+      "workMode": "HYBRID",
+      "startDate": "2019-06",
+      "endDate": "2021-12",
+      "current": false,
+      "achievements": [
+        "Built and shipped native Android applications with 100K+ downloads",
+        "Implemented offline-first architecture with Room database",
+        "Improved app performance by 30% through optimization and profiling"
+      ],
+      "technologies": [
+        "Kotlin",
+        "Android SDK",
+        "MVVM",
+        "Room",
+        "Retrofit"
+      ]
+    }
+  ]
+}

@@ -1,53 +1,55 @@
-[
-  {
-    "category": "Mobile Frameworks",
-    "skills": [
-      {
-        "name": "Kotlin Multiplatform",
-        "description": "Cross-platform development with shared business logic"
-      },
-      {
-        "name": "Jetpack Compose",
-        "description": "Modern Android UI toolkit"
-      },
-      {
-        "name": "SwiftUI",
-        "description": "Native iOS user interface development"
-      }
-    ]
-  },
-  {
-    "category": "Architecture & State",
-    "skills": [
-      {
-        "name": "MVI Architecture",
-        "description": "Unidirectional data flow pattern"
-      },
-      {
-        "name": "Kotlin Coroutines",
-        "description": "Asynchronous programming"
-      },
-      {
-        "name": "Flow & StateFlow",
-        "description": "Reactive state management"
-      }
-    ]
-  },
-  {
-    "category": "Backend & Networking",
-    "skills": [
-      {
-        "name": "Ktor",
-        "description": "Multiplatform networking"
-      },
-      {
-        "name": "SQLDelight",
-        "description": "Type-safe database access"
-      },
-      {
-        "name": "REST APIs",
-        "description": "API integration"
-      }
-    ]
-  }
-]
+{
+  "skillGroups": [
+    {
+      "category": "Mobile Frameworks",
+      "skills": [
+        {
+          "name": "Kotlin Multiplatform",
+          "description": "Cross-platform development with shared business logic"
+        },
+        {
+          "name": "Jetpack Compose",
+          "description": "Modern Android UI toolkit"
+        },
+        {
+          "name": "SwiftUI",
+          "description": "Native iOS user interface development"
+        }
+      ]
+    },
+    {
+      "category": "Architecture & State",
+      "skills": [
+        {
+          "name": "MVI Architecture",
+          "description": "Unidirectional data flow pattern"
+        },
+        {
+          "name": "Kotlin Coroutines",
+          "description": "Asynchronous programming"
+        },
+        {
+          "name": "Flow & StateFlow",
+          "description": "Reactive state management"
+        }
+      ]
+    },
+    {
+      "category": "Backend & Networking",
+      "skills": [
+        {
+          "name": "Ktor",
+          "description": "Multiplatform networking"
+        },
+        {
+          "name": "SQLDelight",
+          "description": "Type-safe database access"
+        },
+        {
+          "name": "REST APIs",
+          "description": "API integration"
+        }
+      ]
+    }
+  ]
+}

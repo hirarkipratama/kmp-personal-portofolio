@@ -26,3 +26,22 @@ kotlin {
         }
     }
 }
+
+val copyContentToDistribution by tasks.registering(Copy::class) {
+    from(project.rootDir.resolve("content"))
+    into(layout.buildDirectory.dir("dist/wasmJs/productionExecutable/content"))
+}
+
+val copyPublicToDistribution by tasks.registering(Copy::class) {
+    from(project.rootDir.resolve("public"))
+    into(layout.buildDirectory.dir("dist/wasmJs/productionExecutable"))
+    exclude("**/.gitkeep")
+}
+
+tasks.named("wasmJsBrowserDistribution") {
+    dependsOn(copyContentToDistribution, copyPublicToDistribution)
+}
+
+tasks.named("wasmJsBrowserProductionWebpack") {
+    finalizedBy(copyContentToDistribution, copyPublicToDistribution)
+}
