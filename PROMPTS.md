@@ -55,8 +55,122 @@ Create a minimal vertical spike only:
 Do not build the portfolio sections. Report a GO / CONDITIONAL GO / NO-GO recommendation. If NO-GO, present the smallest alternative that still keeps KMP value (for example shared Kotlin models with a web-native UI) and wait for approval before changing direction.
 ```
 
+## Phase 2.5 - Skill Integration
+MODE: PLAN ONLY
+
+This is an architecture reconciliation task.
+Do not modify source code, Gradle files, dependencies, configuration,
+or project structure.
+
+Do not install additional dependencies.
+
+Do not implement anything.
+
+Your output is a proposed reconciliation and implementation plan
+for approval before Build mode.
+
+We have already completed Phase 0, Phase 1, and Phase 2 of this portfolio project.
+
+DO NOT repeat or redo those phases.
+
+The following has already been established:
+- Repository reconnaissance has been completed.
+- Stitch desktop and mobile designs have been inspected.
+- Design structure/tokens/component requirements have been identified.
+- The KMP + Compose Multiplatform Web/Wasm technical spike has been completed.
+- The Phase 2 GO/CONDITIONAL GO/NO-GO decision and its evidence already exist in the repository/session artifacts.
+
+A new Compose/Kotlin/KMP agent skill has now been added to this OpenCode project.
+
+Your task is to integrate this skill into the existing project without restarting the project.
+
+First:
+1. Read AGENTS.md.
+2. Read PRD.md.
+3. Read ARCHITECTURE.md.
+4. Read the existing Phase 0–2 outputs/documentation.
+5. Read and understand the newly installed Compose/Kotlin/KMP skill(s).
+6. Inspect the current repository state and Git diff.
+7. Inspect the existing Gradle/KMP setup produced by Phase 2.
+
+Then perform an architecture reconciliation.
+
+Compare:
+A. Existing project decisions from Phase 0–2.
+B. The requirements in PRD.md and ARCHITECTURE.md.
+C. Recommendations from the newly installed skill(s).
+
+For every difference, classify it as:
+- KEEP — existing decision is correct and should remain.
+- ADOPT — skill recommendation improves the project and should be incorporated.
+- ADAPT — skill recommendation is useful but must be simplified for this portfolio.
+- REJECT — recommendation is unnecessary or inappropriate for this project.
+
+Important constraints:
+- Do not restart Phase 0–2.
+- Do not replace the KMP + Compose Multiplatform direction.
+- Do not introduce unnecessary Clean Architecture, MVVM, use-case layers, DI frameworks, networking, databases, or backend services.
+- This is a static portfolio website, not a mobile business application.
+- Keep architecture proportional to the project's complexity.
+- Stitch MCP remains the visual source of truth.
+- The desktop and mobile Stitch designs represent one responsive UI.
+- Do not invent portfolio content, metrics, employment history, or project details.
+
+Pay special attention to:
+- Compose Multiplatform Web/Wasm architecture.
+- commonMain vs wasmJsMain boundaries.
+- Compose state management.
+- UI component organization.
+- design system/token organization.
+- resource/static asset handling.
+- responsive layout patterns.
+- accessibility.
+- performance.
+- testing.
+- browser/platform interop.
+- web-specific limitations.
+- maintainability.
+
+Do not make broad implementation changes yet.
+
+Produce:
+
+1. "Existing Decisions"
+   - Summarize the important decisions already made in Phase 0–2.
+
+2. "Skill Recommendations"
+   - Summarize recommendations from the new skill that are relevant to this project.
+
+3. "Reconciliation"
+   - For each relevant recommendation, classify it as KEEP, ADOPT, ADAPT, or REJECT.
+   - Explain why.
+
+4. "Architecture Changes"
+   - List only the changes that should actually be made to the current architecture.
+
+5. "Phase 3 Implementation Plan"
+   - Provide the exact implementation sequence for the next phase.
+   - Identify files that should be created/modified.
+   - Identify dependencies that are actually necessary.
+
+6. "Risks"
+   - Identify anything introduced by the skill that could overcomplicate the portfolio.
+
+Do not modify source files unless a small documentation update is required.
+Wait for approval before implementing architecture changes.
+STOP after producing the reconciliation.
+
+Do not execute the proposed changes.
+Do not switch to Build mode automatically.
+Wait for explicit approval.
+
 ## Phase 3 — Project foundation (Build mode)
 ```text
+Before implementing, apply the approved decisions from the Phase 2.5 Skill Integration & Architecture Reconciliation.
+
+Do not introduce recommendations that were classified as REJECT.
+Do not add architecture that was not approved.
+
 Implement only the approved project foundation using the existing template conventions.
 
 Requirements:
