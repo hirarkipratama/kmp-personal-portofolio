@@ -1,0 +1,35 @@
+{
+  "identity": {
+    "name": "Mobile Developer",
+    "role": "Kotlin Multiplatform Specialist",
+    "email": null
+  },
+  "hero": {
+    "headline": "Building Cross-Platform Mobile Experiences",
+    "summary": "Specialized in Kotlin Multiplatform development, creating high-performance native mobile applications with shared business logic across Android and iOS.",
+    "technologies": [
+      "Kotlin Multiplatform",
+      "Jetpack Compose",
+      "SwiftUI",
+      "Ktor",
+      "SQLDelight"
+    ],
+    "profileImagePath": null
+  },
+  "metrics": [
+    {
+      "label": "Years Experience",
+      "value": "5+",
+      "description": "Mobile development expertise"
+    },
+    {
+      "label": "Apps Shipped",
+      "value": "10+",
+      "description": "Production applications"
+    }
+  ],
+  "footer": {
+    "copyright": "© 2026 Mobile Developer. Built with Kotlin Multiplatform.",
+    "backToTopLabel": "Back to top"
+  }
+}
