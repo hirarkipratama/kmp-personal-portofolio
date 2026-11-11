@@ -290,8 +290,6 @@ Hide missing optional fields. Do not invent employer details, dates, outcomes, o
 ```text
 Implement the Contact/Footer section with only verified professional links and contact methods. Add a back-to-top action.
 
-If approved audio assets are part of the final scope, load them as static files from public/audio and implement an accessible player with play/pause, progress, seeking, duration, loading, and error states. Do not autoplay. If there are no approved audio files, do not implement an empty audio feature.
-
 Verify all external links, mailto links, focus states, and mobile behavior.
 ```
 
