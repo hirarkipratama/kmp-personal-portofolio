@@ -25,11 +25,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import kotlinproject.shared.generated.resources.Res
 import kotlinproject.shared.generated.resources.profile
+import me.hirarki.pp.domain.model.AboutContent
 import me.hirarki.pp.domain.model.Project
 import me.hirarki.pp.domain.model.SiteContent
 import me.hirarki.pp.domain.model.SkillGroup
@@ -226,6 +229,16 @@ private fun PortfolioPage(
 
             Spacer(modifier = Modifier.height(PortfolioSpacing.xxl))
 
+            if (siteContent.about != null || skillGroups.isNotEmpty() || siteContent.hero.technologies.isNotEmpty()) {
+                AboutProfileMatrix(
+                    siteContent = siteContent,
+                    about = siteContent.about,
+                    skillGroups = skillGroups,
+                    compact = compact
+                )
+                Spacer(modifier = Modifier.height(PortfolioSpacing.xxl))
+            }
+
             SectionBlock(
                 title = "Selected work",
                 subtitle = "Project and case-study references",
@@ -251,21 +264,6 @@ private fun PortfolioPage(
             Spacer(modifier = Modifier.height(PortfolioSpacing.xxl))
 
             SectionBlock(
-                title = "Tech stack",
-                subtitle = "Core disciplines and frameworks",
-                modifier = Modifier.fillMaxWidth().widthIn(max = PortfolioTokens.pageMaxWidth)
-            ) {
-                if (skillGroups.isNotEmpty()) {
-                    val allSkills = skillGroups.flatMap { it.skills }
-                    SkillTagFlow(allSkills.map { it.name })
-                } else {
-                    PlaceholderCard("Skills placeholder ready for approved content")
-                }
-            }
-
-            Spacer(modifier = Modifier.height(PortfolioSpacing.xxl))
-
-            SectionBlock(
                 title = "Contact",
                 subtitle = "Available touchpoints and public channels",
                 modifier = Modifier.fillMaxWidth().widthIn(max = PortfolioTokens.pageMaxWidth)
@@ -284,6 +282,166 @@ private fun PortfolioPage(
                         onClick = null,
                         variant = "secondary"
                     )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun AboutProfileMatrix(
+    siteContent: SiteContent,
+    about: AboutContent?,
+    skillGroups: List<SkillGroup>,
+    compact: Boolean
+) {
+    SectionBlock(
+        title = "About / profile matrix",
+        subtitle = "Professional focus and the tools behind the work",
+        modifier = Modifier.fillMaxWidth().widthIn(max = PortfolioTokens.pageMaxWidth)
+    ) {
+        if (compact) {
+            Column(verticalArrangement = Arrangement.spacedBy(PortfolioSpacing.medium)) {
+                ProfileInfoCard(title = "Professional narrative") {
+                    Text(
+                        text = siteContent.hero.summary,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                if (!about?.focusAreas.isNullOrEmpty()) {
+                    ProfileInfoCard(title = "Engineering focus") {
+                        SkillTagFlow(about.focusAreas, itemsPerRow = 2)
+                    }
+                }
+                if (siteContent.hero.technologies.isNotEmpty()) {
+                    ProfileInfoCard(title = "Mobile frameworks & languages") {
+                        SkillTagFlow(siteContent.hero.technologies, itemsPerRow = 2)
+                    }
+                }
+            }
+        } else {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(PortfolioSpacing.medium),
+                verticalAlignment = Alignment.Top
+            ) {
+                ProfileInfoCard(
+                    title = "Professional narrative",
+                    modifier = Modifier.weight(1.2f)
+                ) {
+                    Text(
+                        text = siteContent.hero.summary,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(PortfolioSpacing.medium)
+                ) {
+                    if (!about?.focusAreas.isNullOrEmpty()) {
+                        ProfileInfoCard(title = "Engineering focus") {
+                            SkillTagFlow(about.focusAreas, itemsPerRow = 2)
+                        }
+                    }
+                    if (siteContent.hero.technologies.isNotEmpty()) {
+                        ProfileInfoCard(title = "Mobile frameworks & languages") {
+                            SkillTagFlow(siteContent.hero.technologies, itemsPerRow = 2)
+                        }
+                    }
+                }
+            }
+        }
+
+        if (skillGroups.isNotEmpty()) {
+            Column(verticalArrangement = Arrangement.spacedBy(PortfolioSpacing.medium)) {
+                skillGroups.chunked(if (compact) 1 else 2).forEach { rowGroups ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(PortfolioSpacing.medium)
+                    ) {
+                        rowGroups.forEach { group ->
+                            SkillGroupCard(group, Modifier.weight(1f))
+                        }
+                        if (!compact && rowGroups.size == 1) {
+                            Spacer(Modifier.weight(1f))
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ProfileInfoCard(
+    title: String,
+    modifier: Modifier = Modifier,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(PortfolioRadius.large),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.9f),
+        border = androidx.compose.foundation.BorderStroke(
+            1.dp,
+            MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(PortfolioSpacing.large),
+            verticalArrangement = Arrangement.spacedBy(PortfolioSpacing.medium)
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.semantics { heading() }
+            )
+            content()
+        }
+    }
+}
+
+@Composable
+private fun SkillGroupCard(
+    group: SkillGroup,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(PortfolioRadius.large),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.9f),
+        border = androidx.compose.foundation.BorderStroke(
+            1.dp,
+            MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(PortfolioSpacing.large),
+            verticalArrangement = Arrangement.spacedBy(PortfolioSpacing.medium)
+        ) {
+            Text(
+                text = group.category,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.semantics { heading() }
+            )
+            group.skills.forEach { skill ->
+                Column(verticalArrangement = Arrangement.spacedBy(PortfolioSpacing.xs)) {
+                    Text(
+                        text = skill.name,
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    if (!skill.description.isNullOrBlank()) {
+                        Text(
+                            text = skill.description,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
             }
         }
@@ -560,7 +718,8 @@ private fun SectionBlock(
             Text(
                 text = title,
                 style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.onBackground
+                color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.semantics { heading() }
             )
             Text(
                 text = subtitle,
@@ -768,12 +927,12 @@ private fun PlaceholderCard(text: String) {
 }
 
 @Composable
-private fun SkillTagFlow(items: List<String>) {
+private fun SkillTagFlow(items: List<String>, itemsPerRow: Int = 3) {
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(PortfolioSpacing.small)
     ) {
-        items.chunked(3).forEach { rowItems ->
+        items.chunked(itemsPerRow).forEach { rowItems ->
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(PortfolioSpacing.small)

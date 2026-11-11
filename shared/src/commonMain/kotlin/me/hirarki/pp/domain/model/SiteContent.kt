@@ -7,7 +7,8 @@ data class SiteContent(
     val identity: Identity,
     val hero: Hero,
     val metrics: List<Metric> = emptyList(),
-    val footer: Footer
+    val footer: Footer,
+    val about: AboutContent? = null
 )
 
 @Serializable
@@ -25,6 +26,15 @@ data class Hero(
     val profileImagePath: String? = null,
     val cvPath: String? = null
 )
+
+@Serializable
+data class AboutContent(
+    val focusAreas: List<String> = emptyList()
+) {
+    init {
+        require(focusAreas.all { it.isNotBlank() }) { "About focus areas cannot be blank" }
+    }
+}
 
 @Serializable
 data class Metric(

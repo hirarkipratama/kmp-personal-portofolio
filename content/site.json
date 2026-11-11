@@ -34,6 +34,15 @@
       "description": "Maintained across Android and iOS"
     }
   ],
+  "about": {
+    "focusAreas": [
+      "Architecture",
+      "Feature delivery",
+      "Testing",
+      "CI/CD",
+      "App releases"
+    ]
+  },
   "footer": {
     "copyright": "© 2026 Hirarki Ardi Pratama. Built with Kotlin Multiplatform.",
     "backToTopLabel": "Back to top"
