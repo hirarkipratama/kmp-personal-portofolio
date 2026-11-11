@@ -1,26 +1,94 @@
 {
   "projects": [
     {
-      "id": "project-placeholder-1",
-      "title": "Cross-Platform Mobile App",
-      "summary": "A production-ready mobile application built with Kotlin Multiplatform, sharing business logic between Android and iOS.",
-      "category": "Mobile Development",
-      "tags": ["Kotlin Multiplatform", "Jetpack Compose", "SwiftUI", "SQLDelight"],
-      "imagePath": null,
-      "problem": "Need to maintain separate codebases for Android and iOS with duplicate business logic.",
-      "solution": "Implemented shared Kotlin Multiplatform architecture with platform-specific UI layers.",
-      "impact": "Reduced development time by 40% and improved consistency across platforms.",
-      "metrics": [
+      "slug": "perfect-assistant",
+      "title": "Perfect Assistant",
+      "category": "Financial services",
+      "featured": true,
+      "screenshots": [
         {
-          "label": "Code Sharing",
-          "value": "60%"
+          "image": "/images/projects/perfect-assistant/screen-01.jpg",
+          "alt": "Perfect Assistant sign-in screen with the AXA Mandiri logo and secure screen option"
         },
         {
-          "label": "Development Time",
-          "value": "-40%"
+          "image": "/images/projects/perfect-assistant/screen-02.jpg",
+          "alt": "Perfect Assistant home screen with a customer rating and fraud-prevention banner"
+        },
+        {
+          "image": "/images/projects/perfect-assistant/screen-03.jpg",
+          "alt": "Policy Complaint Submission screen with an empty complaints state"
+        },
+        {
+          "image": "/images/projects/perfect-assistant/screen-04.jpg",
+          "alt": "FA Rating screen with customer feedback and productivity score details"
         }
       ],
-      "externalUrl": null
+      "technologies": [],
+      "metrics": []
+    },
+    {
+      "slug": "dengerind",
+      "title": "DengerinD",
+      "category": "Wellbeing",
+      "summary": "Suara hati yang tak terdengar...",
+      "screenshots": [
+        {
+          "image": "/images/projects/dengerind/screen-01.jpg",
+          "alt": "DengerinD launch screen with its teal branding and tagline"
+        },
+        {
+          "image": "/images/projects/dengerind/screen-02.jpg",
+          "alt": "DengerinD onboarding screen with a conversation illustration and the message You're not alone"
+        },
+        {
+          "image": "/images/projects/dengerind/screen-03.jpg",
+          "alt": "DengerinD home screen with counselor search, chat and call services, and promotions"
+        }
+      ],
+      "technologies": [],
+      "metrics": []
+    },
+    {
+      "slug": "iwwi-maintenance",
+      "title": "IWWI Maintenance System",
+      "category": "Maintenance",
+      "screenshots": [
+        {
+          "image": "/images/projects/iwwi-maintenance/screen-01.jpg",
+          "alt": "IWWI Maintenance System welcome screen with username and password fields"
+        },
+        {
+          "image": "/images/projects/iwwi-maintenance/screen-02.jpg",
+          "alt": "Maintenance Member home screen with preventive maintenance, checklists, and dashboard options"
+        },
+        {
+          "image": "/images/projects/iwwi-maintenance/screen-03.jpg",
+          "alt": "Maintenance dashboard with planned and completed task counts and a maintenance task list"
+        }
+      ],
+      "technologies": [],
+      "metrics": []
+    },
+    {
+      "slug": "sai-coworking",
+      "title": "SAI Coworking",
+      "category": "Coworking",
+      "screenshots": [
+        {
+          "image": "/images/projects/sai-coworking/screen-01.jpg",
+          "alt": "SAI Coworking welcome screen over a coworking lounge photo"
+        },
+        {
+          "image": "/images/projects/sai-coworking/screen-02.jpg",
+          "alt": "SAI Coworking home screen with room booking, building facilities, and coworking spaces"
+        },
+        {
+          "image": "/images/projects/sai-coworking/screen-03.jpg",
+          "alt": "SAI Coworking location search screen showing the NEO SOHO Central Park location"
+        }
+      ],
+      "technologies": [],
+      "metrics": []
     }
   ]
 }

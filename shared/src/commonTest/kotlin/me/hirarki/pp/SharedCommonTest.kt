@@ -2,6 +2,8 @@ package me.hirarki.pp
 
 import kotlinx.serialization.json.Json
 import me.hirarki.pp.domain.model.AboutContent
+import me.hirarki.pp.domain.model.Project
+import me.hirarki.pp.domain.model.ProjectScreenshot
 import me.hirarki.pp.domain.model.SiteContent
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -57,6 +59,72 @@ class SharedCommonTest {
     fun aboutContentRejectsBlankFocusAreas() {
         assertFailsWith<IllegalArgumentException> {
             AboutContent(listOf(" "))
+        }
+    }
+
+    @Test
+    fun projectDecodesSeparateScreenshotsAndOptionalContent() {
+        val project = Json.decodeFromString<Project>(
+            """
+            {
+              "slug": "sample-project",
+              "title": "Sample Project",
+              "category": "Mobile application",
+              "screenshots": [
+                {
+                  "image": "/images/projects/sample-project/screen-01.jpg",
+                  "alt": "Sample Project account dashboard"
+                },
+                {
+                  "image": "/images/projects/sample-project/screen-02.jpg",
+                  "alt": "Sample Project settings screen"
+                }
+              ],
+              "technologies": []
+            }
+            """.trimIndent()
+        )
+
+        assertEquals("sample-project", project.slug)
+        assertEquals(2, project.screenshots.size)
+        assertEquals("Sample Project account dashboard", project.screenshots.first().alt)
+        assertEquals(null, project.problem)
+        assertEquals(emptyList(), project.technologies)
+    }
+
+    @Test
+    fun projectScreenshotRequiresMeaningfulAltText() {
+        assertFailsWith<IllegalArgumentException> {
+            ProjectScreenshot(
+                image = "/images/projects/sample-project/screen-01.jpg",
+                alt = " "
+            )
+        }
+    }
+
+    @Test
+    fun projectRejectsUnsafeScreenshotPathsAndExternalUrls() {
+        assertFailsWith<IllegalArgumentException> {
+            Project(
+                slug = "sample-project",
+                title = "Sample Project",
+                category = "Mobile application",
+                screenshots = listOf(
+                    ProjectScreenshot(
+                        image = "/images/projects/../private.png",
+                        alt = "Sample Project account dashboard"
+                    )
+                )
+            )
+        }
+
+        assertFailsWith<IllegalArgumentException> {
+            Project(
+                slug = "sample-project",
+                title = "Sample Project",
+                category = "Mobile application",
+                caseStudyUrl = "javascript:alert(1)"
+            )
         }
     }
 }

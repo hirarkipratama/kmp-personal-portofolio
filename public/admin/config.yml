@@ -57,15 +57,22 @@ collections:
             name: "projects"
             widget: "list"
             fields:
-              - {label: "ID", name: "id", widget: "string"}
+              - {label: "Slug", name: "slug", widget: "string"}
               - {label: "Title", name: "title", widget: "string"}
-              - {label: "Summary", name: "summary", widget: "text"}
               - {label: "Category", name: "category", widget: "string"}
-              - {label: "Tags", name: "tags", widget: "list", default: []}
-              - {label: "Image Path", name: "imagePath", widget: "image", required: false}
+              - {label: "Summary", name: "summary", widget: "text", required: false}
               - {label: "Problem", name: "problem", widget: "text", required: false}
               - {label: "Solution", name: "solution", widget: "text", required: false}
               - {label: "Impact", name: "impact", widget: "text", required: false}
+              - label: "Screenshots"
+                name: "screenshots"
+                widget: "list"
+                required: false
+                fields:
+                  - {label: "Image", name: "image", widget: "image", media_folder: "public/images/projects", public_folder: "/images/projects"}
+                  - {label: "Alt Text", name: "alt", widget: "string"}
+                  - {label: "Caption", name: "caption", widget: "string", required: false}
+              - {label: "Technologies", name: "technologies", widget: "list", default: []}
               - label: "Metrics"
                 name: "metrics"
                 widget: "list"
@@ -73,7 +80,8 @@ collections:
                 fields:
                   - {label: "Label", name: "label", widget: "string"}
                   - {label: "Value", name: "value", widget: "string"}
-              - {label: "External URL", name: "externalUrl", widget: "string", required: false}
+              - {label: "Case Study URL", name: "caseStudyUrl", widget: "string", required: false}
+              - {label: "Featured", name: "featured", widget: "boolean", default: false}
 
   - name: "skills"
     label: "Skills"

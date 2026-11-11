@@ -6,6 +6,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -24,20 +26,29 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import kotlinproject.shared.generated.resources.Res
 import kotlinproject.shared.generated.resources.profile
 import me.hirarki.pp.domain.model.AboutContent
 import me.hirarki.pp.domain.model.Project
+import me.hirarki.pp.domain.model.ProjectScreenshot
 import me.hirarki.pp.domain.model.SiteContent
 import me.hirarki.pp.domain.model.SkillGroup
 import me.hirarki.pp.domain.model.SocialLink
 import me.hirarki.pp.domain.repository.PortfolioRepository
+import me.hirarki.pp.domain.repository.loadProjectImage
+import me.hirarki.pp.openExternalUrl
 import me.hirarki.pp.ui.theme.PortfolioColors
 import me.hirarki.pp.ui.theme.PortfolioDarkColorScheme
 import me.hirarki.pp.ui.theme.PortfolioRadius
@@ -239,29 +250,41 @@ private fun PortfolioPage(
                 Spacer(modifier = Modifier.height(PortfolioSpacing.xxl))
             }
 
-            SectionBlock(
-                title = "Selected work",
-                subtitle = "Project and case-study references",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .widthIn(max = PortfolioTokens.pageMaxWidth)
-                    .bringIntoViewRequester(projectsRequester)
-            ) {
-                if (projects.isNotEmpty()) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(PortfolioSpacing.medium)
-                    ) {
-                        projects.take(3).forEach { project ->
-                            ProjectCard(project, compact, Modifier.weight(1f))
-                        }
+            if (projects.isNotEmpty()) {
+                SectionBlock(
+                    title = "Selected work",
+                    subtitle = "Mobile applications and product experiences",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .widthIn(max = PortfolioTokens.pageMaxWidth)
+                        .bringIntoViewRequester(projectsRequester)
+                ) {
+                    projects.filter { it.featured }.forEach { project ->
+                        ProjectCard(project, compact, featured = true)
                     }
-                } else {
-                    PlaceholderCard("Project content placeholder")
-                }
-            }
 
-            Spacer(modifier = Modifier.height(PortfolioSpacing.xxl))
+                    projects.filterNot { it.featured }
+                        .chunked(if (compact) 1 else 2)
+                        .forEach { projectRow ->
+                            val wideRow = !compact && projectRow.size == 1
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(PortfolioSpacing.medium)
+                            ) {
+                                projectRow.forEach { project ->
+                                    ProjectCard(
+                                        project = project,
+                                        compact = compact,
+                                        featured = wideRow,
+                                        modifier = if (wideRow) Modifier else Modifier.weight(1f)
+                                    )
+                                }
+                            }
+                        }
+                }
+
+                Spacer(modifier = Modifier.height(PortfolioSpacing.xxl))
+            }
 
             SectionBlock(
                 title = "Contact",
@@ -772,6 +795,7 @@ private fun MetricCard(
 private fun ProjectCard(
     project: Project,
     compact: Boolean,
+    featured: Boolean,
     modifier: Modifier = Modifier
 ) {
     Surface(
@@ -782,49 +806,225 @@ private fun ProjectCard(
     ) {
         Column(
             modifier = Modifier.padding(PortfolioSpacing.large),
-            verticalArrangement = Arrangement.spacedBy(PortfolioSpacing.small)
+            verticalArrangement = Arrangement.spacedBy(PortfolioSpacing.medium)
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(if (compact) 170.dp else 220.dp)
-                    .background(
-                        brush = Brush.linearGradient(
-                            listOf(
-                                PortfolioColors.Primary.copy(alpha = 0.28f),
-                                PortfolioColors.Secondary.copy(alpha = 0.20f),
-                                Color.Transparent
-                            )
-                        ),
-                        shape = RoundedCornerShape(PortfolioRadius.medium)
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = project.title.take(18).ifEmpty { "Project" },
-                    style = if (compact) MaterialTheme.typography.titleMedium else MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.primary,
-                    textAlign = TextAlign.Center
+            if (featured && !compact) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(PortfolioSpacing.large),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    ProjectScreenshotRail(
+                        project = project,
+                        compact = compact,
+                        featured = true,
+                        modifier = Modifier.weight(1.15f)
+                    )
+                    ProjectDetails(project, Modifier.weight(0.85f))
+                }
+            } else {
+                ProjectScreenshotRail(
+                    project = project,
+                    compact = compact,
+                    featured = featured
                 )
+                ProjectDetails(project, Modifier.fillMaxWidth())
             }
+        }
+    }
+}
 
-            Text(
-                text = project.category,
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.primary
+@Composable
+private fun ProjectScreenshotRail(
+    project: Project,
+    compact: Boolean,
+    featured: Boolean,
+    modifier: Modifier = Modifier
+) {
+    val screenshotWidth = when {
+        compact -> 152.dp
+        featured -> 164.dp
+        else -> 132.dp
+    }
+
+    LazyRow(
+        modifier = modifier
+            .fillMaxWidth()
+            .semantics { contentDescription = "${project.title} screenshots" },
+        horizontalArrangement = Arrangement.spacedBy(PortfolioSpacing.medium)
+    ) {
+        items(project.screenshots, key = { it.image }) { screenshot ->
+            Column(
+                modifier = Modifier.width(screenshotWidth),
+                verticalArrangement = Arrangement.spacedBy(PortfolioSpacing.small)
+            ) {
+                ProjectScreenshotImage(
+                    screenshot = screenshot,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(0.47f)
+                )
+                if (!screenshot.caption.isNullOrBlank()) {
+                    Text(
+                        text = screenshot.caption,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ProjectScreenshotImage(
+    screenshot: ProjectScreenshot,
+    modifier: Modifier = Modifier
+) {
+    var bitmap by remember(screenshot.image) { mutableStateOf<ImageBitmap?>(null) }
+    var errorMessage by remember(screenshot.image) { mutableStateOf<String?>(null) }
+    var isInViewport by remember(screenshot.image) { mutableStateOf(false) }
+    val viewportHeight = LocalWindowInfo.current.containerSize.height.toFloat()
+
+    LaunchedEffect(screenshot.image, isInViewport) {
+        if (!isInViewport) return@LaunchedEffect
+
+        try {
+            bitmap = loadProjectImage(screenshot.image)
+        } catch (exception: CancellationException) {
+            throw exception
+        } catch (exception: Exception) {
+            errorMessage = exception.message ?: "Image unavailable"
+        }
+    }
+
+    val shape = RoundedCornerShape(PortfolioRadius.medium)
+    Box(
+        modifier = modifier
+            .onGloballyPositioned { coordinates ->
+                val bounds = coordinates.boundsInWindow()
+                if (bounds.bottom > 0f && bounds.top < viewportHeight) {
+                    isInViewport = true
+                }
+            }
+            .clip(shape)
+            .background(MaterialTheme.colorScheme.surface)
+            .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.55f), shape)
+            .semantics { contentDescription = screenshot.alt },
+        contentAlignment = Alignment.Center
+    ) {
+        when (val loadedBitmap = bitmap) {
+            null -> {
+                if (errorMessage != null) {
+                    Text(
+                        text = "Image unavailable",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                } else {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        strokeWidth = 2.dp,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+            else -> Image(
+                bitmap = loadedBitmap,
+                contentDescription = null,
+                contentScale = ContentScale.Fit,
+                modifier = Modifier.fillMaxSize()
             )
+        }
+    }
+}
+
+@Composable
+private fun ProjectDetails(
+    project: Project,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(PortfolioSpacing.small)
+    ) {
+        Text(
+            text = project.category,
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.primary
+        )
+        Text(
+            text = project.title,
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.onBackground,
+            modifier = Modifier.semantics { heading() }
+        )
+
+        project.summary?.takeIf(String::isNotBlank)?.let { summary ->
             Text(
-                text = project.title,
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-            Text(
-                text = project.summary,
+                text = summary,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+        }
 
-            SkillTagFlow(project.tags)
+        ProjectDetail("Problem", project.problem)
+        ProjectDetail("Solution", project.solution)
+        ProjectDetail("Impact", project.impact)
+
+        if (project.metrics.isNotEmpty()) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(PortfolioSpacing.medium)
+            ) {
+                project.metrics.forEach { metric ->
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(PortfolioSpacing.xs)
+                    ) {
+                        Text(
+                            text = metric.value,
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Text(
+                            text = metric.label,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+        }
+
+        if (project.technologies.isNotEmpty()) {
+            SkillTagFlow(project.technologies)
+        }
+
+        project.caseStudyUrl?.let { url ->
+            PortfolioButton(
+                text = "View case study",
+                onClick = { openExternalUrl(url) },
+                variant = "secondary"
+            )
+        }
+    }
+}
+
+@Composable
+private fun ProjectDetail(label: String, value: String?) {
+    value?.takeIf(String::isNotBlank)?.let {
+        Column(verticalArrangement = Arrangement.spacedBy(PortfolioSpacing.xs)) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                text = it,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }
