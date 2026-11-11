@@ -2,7 +2,10 @@ package me.hirarki.pp
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -15,13 +18,18 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
+import kotlinproject.shared.generated.resources.Res
+import kotlinproject.shared.generated.resources.profile
 import me.hirarki.pp.domain.model.Project
 import me.hirarki.pp.domain.model.SiteContent
 import me.hirarki.pp.domain.model.SkillGroup
@@ -33,6 +41,7 @@ import me.hirarki.pp.ui.theme.PortfolioRadius
 import me.hirarki.pp.ui.theme.PortfolioSpacing
 import me.hirarki.pp.ui.theme.PortfolioTokens
 import me.hirarki.pp.ui.theme.PortfolioTypography
+import org.jetbrains.compose.resources.painterResource
 
 @Composable
 fun App() {
@@ -137,6 +146,8 @@ private fun PortfolioPage(
 ) {
     val navItems = listOf("Overview", "Projects", "Skills", "Experience", "Contact")
     val contentScrollState = rememberScrollState()
+    val projectsRequester = remember { BringIntoViewRequester() }
+    val coroutineScope = rememberCoroutineScope()
     val pageModifier = Modifier
         .fillMaxSize()
         .background(PortfolioColors.Background)
@@ -178,27 +189,38 @@ private fun PortfolioPage(
 
             PortfolioHero(
                 siteContent = siteContent,
-                compact = compact
+                compact = compact,
+                onFeaturedProjects = {
+                    coroutineScope.launch { projectsRequester.bringIntoView() }
+                },
+                onDownloadCv = siteContent.hero.cvPath
+                    ?.takeIf(::isSafeCvPath)
+                    ?.let { path ->
+                        { downloadFile(path, "Hirarki-Ardi-Pratama-CV.pdf") }
+                    }
             )
 
             Spacer(modifier = Modifier.height(PortfolioSpacing.xxl))
 
-            SectionBlock(
-                title = "Key metrics",
-                subtitle = "Verified portfolio indicators",
-                modifier = Modifier.fillMaxWidth().widthIn(max = PortfolioTokens.pageMaxWidth)
-            ) {
-                if (siteContent.metrics.isNotEmpty()) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(PortfolioSpacing.medium)
-                    ) {
-                        siteContent.metrics.forEach { metric ->
-                            MetricCard(metric, Modifier.weight(1f))
+            if (siteContent.metrics.isNotEmpty()) {
+                SectionBlock(
+                    title = "Impact metrics",
+                    subtitle = "Verified experience and product outcomes",
+                    modifier = Modifier.fillMaxWidth().widthIn(max = PortfolioTokens.pageMaxWidth)
+                ) {
+                    siteContent.metrics.chunked(if (compact) 2 else siteContent.metrics.size).forEach { rowMetrics ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(PortfolioSpacing.medium)
+                        ) {
+                            rowMetrics.forEach { metric ->
+                                MetricCard(metric, Modifier.weight(1f))
+                            }
+                            if (compact && rowMetrics.size == 1) {
+                                Spacer(Modifier.weight(1f))
+                            }
                         }
                     }
-                } else {
-                    PlaceholderCard("Metrics pending approval")
                 }
             }
 
@@ -207,7 +229,10 @@ private fun PortfolioPage(
             SectionBlock(
                 title = "Selected work",
                 subtitle = "Project and case-study references",
-                modifier = Modifier.fillMaxWidth().widthIn(max = PortfolioTokens.pageMaxWidth)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .widthIn(max = PortfolioTokens.pageMaxWidth)
+                    .bringIntoViewRequester(projectsRequester)
             ) {
                 if (projects.isNotEmpty()) {
                     Row(
@@ -351,15 +376,15 @@ private fun PortfolioHeader(
 }
 
 @Composable
-private fun PortfolioHero(siteContent: SiteContent, compact: Boolean) {
-    val heroModifier = if (compact) {
-        Modifier.fillMaxWidth()
-    } else {
-        Modifier.fillMaxWidth()
-    }
-
+private fun PortfolioHero(
+    siteContent: SiteContent,
+    compact: Boolean,
+    onFeaturedProjects: () -> Unit,
+    onDownloadCv: (() -> Unit)?
+) {
     Surface(
-        modifier = heroModifier
+        modifier = Modifier
+            .fillMaxWidth()
             .clip(RoundedCornerShape(PortfolioRadius.xl))
             .border(
                 width = 1.dp,
@@ -369,85 +394,150 @@ private fun PortfolioHero(siteContent: SiteContent, compact: Boolean) {
         color = Color(0xFF121A2A),
         tonalElevation = 0.dp
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(if (compact) 20.dp else 32.dp),
-            horizontalArrangement = Arrangement.spacedBy(PortfolioSpacing.xl),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+        if (compact) {
             Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(PortfolioSpacing.medium)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp),
+                verticalArrangement = Arrangement.spacedBy(PortfolioSpacing.large)
             ) {
-                Text(
-                    text = siteContent.identity.role,
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.primary
+                HeroCopy(siteContent, onFeaturedProjects, onDownloadCv, compact)
+                ProfilePanel(siteContent, Modifier.fillMaxWidth())
+            }
+        } else {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(32.dp),
+                horizontalArrangement = Arrangement.spacedBy(PortfolioSpacing.xl),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                HeroCopy(
+                    siteContent = siteContent,
+                    onFeaturedProjects = onFeaturedProjects,
+                    onDownloadCv = onDownloadCv,
+                    compact = compact,
+                    modifier = Modifier.weight(1f)
                 )
+                ProfilePanel(siteContent, Modifier.width(280.dp))
+            }
+        }
+    }
+}
 
-                Text(
-                    text = siteContent.identity.name,
-                    style = if (compact) MaterialTheme.typography.headlineMedium else MaterialTheme.typography.headlineLarge,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    modifier = Modifier.fillMaxWidth()
+private fun isSafeCvPath(path: String): Boolean =
+    path.startsWith("/cv/") && path.split('/').none { it == "." || it == ".." }
+
+@Composable
+private fun HeroCopy(
+    siteContent: SiteContent,
+    onFeaturedProjects: () -> Unit,
+    onDownloadCv: (() -> Unit)?,
+    compact: Boolean,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(PortfolioSpacing.medium)
+    ) {
+        Text(
+            text = siteContent.identity.role,
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.primary
+        )
+
+        Text(
+            text = siteContent.identity.name,
+            style = if (compact) MaterialTheme.typography.headlineMedium else MaterialTheme.typography.headlineLarge,
+            color = MaterialTheme.colorScheme.onBackground,
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Text(
+            text = siteContent.hero.headline,
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        Text(
+            text = siteContent.hero.summary,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(PortfolioSpacing.small),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            PortfolioButton(text = "Featured projects", onClick = onFeaturedProjects, variant = "primary")
+            if (onDownloadCv != null) {
+                PortfolioButton(text = "Download CV", onClick = onDownloadCv, variant = "secondary")
+            }
+        }
+
+        if (siteContent.hero.technologies.isNotEmpty()) {
+            SkillTagFlow(siteContent.hero.technologies)
+        }
+    }
+}
+
+@Composable
+private fun ProfilePanel(siteContent: SiteContent, modifier: Modifier = Modifier) {
+    Card(
+        modifier = modifier,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.85f)),
+        shape = RoundedCornerShape(PortfolioRadius.large)
+    ) {
+        Column {
+            if (!siteContent.hero.profileImagePath.isNullOrBlank()) {
+                Image(
+                    painter = painterResource(Res.drawable.profile),
+                    contentDescription = "Portrait of ${siteContent.identity.name}",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(300.dp)
+                        .clip(RoundedCornerShape(PortfolioRadius.large))
                 )
-
-                Text(
-                    text = siteContent.hero.headline,
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
-                Text(
-                    text = siteContent.hero.summary,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(PortfolioSpacing.small),
-                    modifier = Modifier.fillMaxWidth()
+            } else {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(220.dp)
+                        .background(
+                            brush = Brush.linearGradient(
+                                listOf(
+                                    PortfolioColors.Primary.copy(alpha = 0.3f),
+                                    PortfolioColors.Secondary.copy(alpha = 0.2f),
+                                    Color.Transparent
+                                )
+                            )
+                        ),
+                    contentAlignment = Alignment.Center
                 ) {
-                    PortfolioButton(text = "Featured projects", onClick = null, variant = "primary")
-                    PortfolioButton(text = "Download CV", onClick = null, variant = "secondary")
-                }
-
-                if (siteContent.hero.technologies.isNotEmpty()) {
-                    SkillTagFlow(siteContent.hero.technologies)
+                    Text(
+                        text = "Profile",
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
                 }
             }
 
-            if (!compact) {
-                Card(
-                    modifier = Modifier.width(280.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.85f)),
-                    shape = RoundedCornerShape(PortfolioRadius.large)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(240.dp)
-                            .background(
-                                brush = Brush.linearGradient(
-                                    listOf(
-                                        PortfolioColors.Primary.copy(alpha = 0.3f),
-                                        PortfolioColors.Secondary.copy(alpha = 0.2f),
-                                        Color.Transparent
-                                    )
-                                )
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "Profile\nPreview",
-                            style = MaterialTheme.typography.headlineMedium,
-                            color = MaterialTheme.colorScheme.primary,
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                }
+            Column(
+                modifier = Modifier.padding(PortfolioSpacing.medium),
+                verticalArrangement = Arrangement.spacedBy(PortfolioSpacing.xs)
+            ) {
+                Text(
+                    text = siteContent.identity.name,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = siteContent.identity.role,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
     }
@@ -646,6 +736,7 @@ private fun PortfolioButton(
         onClick = { onClick?.invoke() },
         modifier = Modifier,
         colors = colors,
+        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
         shape = RoundedCornerShape(PortfolioRadius.full),
         enabled = onClick != null
     ) {
@@ -694,4 +785,3 @@ private fun SkillTagFlow(items: List<String>) {
         }
     }
 }
-

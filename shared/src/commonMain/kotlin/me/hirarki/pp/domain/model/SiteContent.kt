@@ -22,7 +22,8 @@ data class Hero(
     val headline: String,
     val summary: String,
     val technologies: List<String> = emptyList(),
-    val profileImagePath: String? = null
+    val profileImagePath: String? = null,
+    val cvPath: String? = null
 )
 
 @Serializable

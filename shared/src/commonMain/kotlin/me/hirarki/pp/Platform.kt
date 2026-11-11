@@ -5,3 +5,5 @@ interface Platform {
 }
 
 expect fun getPlatform(): Platform
+
+expect fun downloadFile(path: String, filename: String)

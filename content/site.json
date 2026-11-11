@@ -1,35 +1,41 @@
 {
   "identity": {
-    "name": "Mobile Developer",
-    "role": "Kotlin Multiplatform Specialist",
+    "name": "Hirarki Ardi Pratama",
+    "role": "Senior Mobile Developer (Flutter & Android Kotlin)",
     "email": null
   },
   "hero": {
-    "headline": "Building Cross-Platform Mobile Experiences",
-    "summary": "Specialized in Kotlin Multiplatform development, creating high-performance native mobile applications with shared business logic across Android and iOS.",
+    "headline": "Building secure, reliable mobile applications",
+    "summary": "Senior Mobile Developer with 5+ years of experience across Flutter and native Android. Focused on architecture, feature delivery, testing, CI/CD, and app releases.",
     "technologies": [
-      "Kotlin Multiplatform",
+      "Flutter",
+      "Dart",
+      "Kotlin",
       "Jetpack Compose",
-      "SwiftUI",
-      "Ktor",
-      "SQLDelight"
+      "Android SDK"
     ],
-    "profileImagePath": null
+    "profileImagePath": "/images/profile.JPG",
+    "cvPath": "/cv/CV - Hirarki Ardi Pratama - Senior Mobile Developer (Flutter & Android Kotlin).pdf"
   },
   "metrics": [
     {
       "label": "Years Experience",
       "value": "5+",
-      "description": "Mobile development expertise"
+      "description": "Across Flutter and native Android"
     },
     {
-      "label": "Apps Shipped",
-      "value": "10+",
-      "description": "Production applications"
+      "label": "Active Users",
+      "value": "50,000+",
+      "description": "Across financial and insurance applications"
+    },
+    {
+      "label": "Crash-Free Sessions",
+      "value": "99.8%+",
+      "description": "Maintained across Android and iOS"
     }
   ],
   "footer": {
-    "copyright": "© 2026 Mobile Developer. Built with Kotlin Multiplatform.",
+    "copyright": "© 2026 Hirarki Ardi Pratama. Built with Kotlin Multiplatform.",
     "backToTopLabel": "Back to top"
   }
 }

@@ -39,9 +39,5 @@ val copyPublicToDistribution by tasks.registering(Copy::class) {
 }
 
 tasks.named("wasmJsBrowserDistribution") {
-    dependsOn(copyContentToDistribution, copyPublicToDistribution)
-}
-
-tasks.named("wasmJsBrowserProductionWebpack") {
     finalizedBy(copyContentToDistribution, copyPublicToDistribution)
 }
