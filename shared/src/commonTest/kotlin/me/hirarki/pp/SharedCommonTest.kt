@@ -7,6 +7,7 @@ import me.hirarki.pp.domain.model.Project
 import me.hirarki.pp.domain.model.ProjectScreenshot
 import me.hirarki.pp.domain.model.Service
 import me.hirarki.pp.domain.model.SiteContent
+import me.hirarki.pp.domain.model.SocialLink
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -161,6 +162,36 @@ class SharedCommonTest {
                 description = "Architecture and implementation.",
                 capabilities = listOf(" ")
             )
+        }
+    }
+
+    @Test
+    fun socialLinkAcceptsHttpsAndEmailLinks() {
+        SocialLink(
+            platform = "GitHub",
+            url = "https://github.com/portfolio-owner",
+            label = "View GitHub profile"
+        )
+        SocialLink(
+            platform = "Email",
+            url = "mailto:owner@example.com",
+            label = "Send email"
+        )
+    }
+
+    @Test
+    fun socialLinkRejectsUnsafeOrMalformedUrls() {
+        listOf(
+            "http://example.com",
+            "javascript:alert(1)",
+            "https:///missing-host",
+            "https://%",
+            "mailto:not-an-email",
+            "mailto:@example.com"
+        ).forEach { url ->
+            assertFailsWith<IllegalArgumentException> {
+                SocialLink(platform = "Link", url = url, label = "Open link")
+            }
         }
     }
 

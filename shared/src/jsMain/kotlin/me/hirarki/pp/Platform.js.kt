@@ -26,7 +26,7 @@ actual fun downloadFile(path: String, filename: String) {
 actual fun openExternalUrl(url: String) {
     val anchor = document.createElement("a") as org.w3c.dom.HTMLAnchorElement
     anchor.setAttribute("href", url)
-    anchor.setAttribute("target", "_blank")
+    anchor.setAttribute("target", if (url.startsWith("mailto:")) "_self" else "_blank")
     anchor.setAttribute("rel", "noopener noreferrer")
     document.body?.appendChild(anchor)
     anchor.click()

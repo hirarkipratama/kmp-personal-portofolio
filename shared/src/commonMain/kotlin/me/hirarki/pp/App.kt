@@ -19,11 +19,13 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
@@ -173,9 +175,11 @@ private fun PortfolioPage(
     skillGroups: List<SkillGroup>,
     socialLinks: List<SocialLink>
 ) {
-    val navItems = listOf("About", "Projects", "Services", "Experience", "Contact")
+    val navItems = listOf("About", "Projects", "Services", "Experience") +
+        if (socialLinks.isNotEmpty()) listOf("Contact") else emptyList()
     val contentScrollState = rememberScrollState()
     val projectsRequester = remember { BringIntoViewRequester() }
+    val contactRequester = remember { BringIntoViewRequester() }
     val coroutineScope = rememberCoroutineScope()
     val pageModifier = Modifier
         .fillMaxSize()
@@ -210,7 +214,10 @@ private fun PortfolioPage(
                     compact = compact,
                     menuOpen = menuOpen,
                     onToggleMenu = { menuOpen = !menuOpen },
-                    socialLinks = socialLinks
+                    onContactClick = {
+                        coroutineScope.launch { contactRequester.bringIntoView() }
+                        menuOpen = false
+                    }
                 )
             }
 
@@ -337,27 +344,29 @@ private fun PortfolioPage(
                 Spacer(modifier = Modifier.height(PortfolioSpacing.xxl))
             }
 
-            SectionBlock(
-                title = "Contact",
-                subtitle = "Available touchpoints and public channels",
-                modifier = Modifier.fillMaxWidth().widthIn(max = PortfolioTokens.pageMaxWidth)
-            ) {
-                Column(verticalArrangement = Arrangement.spacedBy(PortfolioSpacing.medium)) {
-                    if (socialLinks.isNotEmpty()) {
+            if (socialLinks.isNotEmpty()) {
+                SectionBlock(
+                    title = "Contact",
+                    subtitle = "Professional links and contact methods",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .widthIn(max = PortfolioTokens.pageMaxWidth)
+                        .bringIntoViewRequester(contactRequester)
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(PortfolioSpacing.medium)) {
                         socialLinks.forEach { link ->
                             SocialLinkButton(link)
                         }
-                    } else {
-                        PlaceholderCard("Professional links pending confirmation")
                     }
-
-                    PortfolioButton(
-                        text = siteContent.footer.backToTopLabel,
-                        onClick = null,
-                        variant = "secondary"
-                    )
                 }
+                Spacer(modifier = Modifier.height(PortfolioSpacing.xxl))
             }
+
+            PortfolioFooter(
+                siteContent = siteContent,
+                compact = compact,
+                onBackToTop = { coroutineScope.launch { contentScrollState.scrollTo(0) } }
+            )
         }
     }
 }
@@ -528,7 +537,7 @@ private fun PortfolioHeader(
     compact: Boolean,
     menuOpen: Boolean,
     onToggleMenu: () -> Unit,
-    socialLinks: List<SocialLink>
+    onContactClick: () -> Unit
 ) {
     Surface(
         modifier = Modifier
@@ -568,15 +577,25 @@ private fun PortfolioHeader(
                 } else {
                     Row(horizontalArrangement = Arrangement.spacedBy(PortfolioSpacing.medium)) {
                         navItems.forEach { item ->
-                            Text(
-                                text = item,
-                                style = MaterialTheme.typography.labelLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(PortfolioRadius.full))
-                                    .background(Color(0x141C2A46))
-                                    .padding(horizontal = 12.dp, vertical = 8.dp)
-                            )
+                            if (item == "Contact") {
+                                TextButton(onClick = onContactClick) {
+                                    Text(
+                                        text = item,
+                                        style = MaterialTheme.typography.labelLarge,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            } else {
+                                Text(
+                                    text = item,
+                                    style = MaterialTheme.typography.labelLarge,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(PortfolioRadius.full))
+                                        .background(Color(0x141C2A46))
+                                        .padding(horizontal = 12.dp, vertical = 8.dp)
+                                )
+                            }
                         }
                     }
                 }
@@ -590,16 +609,29 @@ private fun PortfolioHeader(
                     verticalArrangement = Arrangement.spacedBy(PortfolioSpacing.small)
                 ) {
                     navItems.forEach { item ->
-                        Text(
-                            text = item,
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(PortfolioRadius.medium))
-                                .background(Color(0x141C2A46))
-                                .padding(horizontal = 12.dp, vertical = 10.dp)
-                        )
+                        if (item == "Contact") {
+                            TextButton(
+                                onClick = onContactClick,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text(
+                                    text = item,
+                                    style = MaterialTheme.typography.labelLarge,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        } else {
+                            Text(
+                                text = item,
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(PortfolioRadius.medium))
+                                    .background(Color(0x141C2A46))
+                                    .padding(horizontal = 12.dp, vertical = 10.dp)
+                            )
+                        }
                     }
                 }
             }
@@ -1274,31 +1306,114 @@ private fun ProjectDetail(label: String, value: String?) {
 
 @Composable
 private fun SocialLinkButton(link: SocialLink) {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
+    var isFocused by remember { mutableStateOf(false) }
+    Button(
+        onClick = { openExternalUrl(link.url) },
+        modifier = Modifier
+            .fillMaxWidth()
+            .onFocusChanged { isFocused = it.isFocused }
+            .then(
+                if (isFocused) {
+                    Modifier.border(
+                        2.dp,
+                        MaterialTheme.colorScheme.primary,
+                        RoundedCornerShape(PortfolioRadius.medium)
+                    )
+                } else {
+                    Modifier
+                }
+            ),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.85f),
+            contentColor = MaterialTheme.colorScheme.onSurface
+        ),
         shape = RoundedCornerShape(PortfolioRadius.medium),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.85f),
-        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.25f))
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp)
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
+            modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
+            Column(verticalArrangement = Arrangement.spacedBy(PortfolioSpacing.xs)) {
+                Text(
+                    text = link.platform,
+                    style = MaterialTheme.typography.labelLarge
+                )
+                Text(
+                    text = link.label,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
             Text(
-                text = link.platform,
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Text(
-                text = link.label,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.primary
+                text = "Open",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }
+}
+
+@Composable
+private fun PortfolioFooter(
+    siteContent: SiteContent,
+    compact: Boolean,
+    onBackToTop: () -> Unit
+) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .widthIn(max = PortfolioTokens.pageMaxWidth),
+        shape = RoundedCornerShape(PortfolioRadius.large),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
+        border = androidx.compose.foundation.BorderStroke(
+            1.dp,
+            MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+        )
+    ) {
+        if (compact) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(PortfolioSpacing.medium),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(PortfolioSpacing.medium)
+            ) {
+                FooterCopyright(siteContent)
+                PortfolioButton(
+                    text = siteContent.footer.backToTopLabel,
+                    onClick = onBackToTop,
+                    variant = "secondary"
+                )
+            }
+        } else {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = PortfolioSpacing.large, vertical = PortfolioSpacing.medium),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                FooterCopyright(siteContent)
+                PortfolioButton(
+                    text = siteContent.footer.backToTopLabel,
+                    onClick = onBackToTop,
+                    variant = "secondary"
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun FooterCopyright(siteContent: SiteContent) {
+    Text(
+        text = siteContent.footer.copyright,
+        style = MaterialTheme.typography.labelMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        textAlign = TextAlign.Center
+    )
 }
 
 @Composable
@@ -1323,6 +1438,7 @@ private fun PortfolioButton(
     onClick: (() -> Unit)?,
     variant: String = "primary"
 ) {
+    var isFocused by remember { mutableStateOf(false) }
     val colors = when (variant) {
         "secondary" -> ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant,
@@ -1336,7 +1452,19 @@ private fun PortfolioButton(
 
     Button(
         onClick = { onClick?.invoke() },
-        modifier = Modifier,
+        modifier = Modifier
+            .onFocusChanged { isFocused = it.isFocused }
+            .then(
+                if (isFocused) {
+                    Modifier.border(
+                        2.dp,
+                        MaterialTheme.colorScheme.primary,
+                        RoundedCornerShape(PortfolioRadius.full)
+                    )
+                } else {
+                    Modifier
+                }
+            ),
         colors = colors,
         contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
         shape = RoundedCornerShape(PortfolioRadius.full),
