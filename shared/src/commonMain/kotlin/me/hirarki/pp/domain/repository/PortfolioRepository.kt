@@ -14,6 +14,9 @@ private data class SkillGroupsWrapper(val skillGroups: List<SkillGroup>)
 private data class ExperienceWrapper(val experience: List<Experience>)
 
 @Serializable
+private data class ServicesWrapper(val services: List<Service>)
+
+@Serializable
 private data class SocialLinksWrapper(val socialLinks: List<SocialLink>)
 
 class PortfolioRepository {
@@ -46,7 +49,13 @@ class PortfolioRepository {
         val wrapper = json.decodeFromString<ExperienceWrapper>(jsonString)
         wrapper.experience
     }
-    
+
+    suspend fun loadServices(): Result<List<Service>> = runCatching {
+        val jsonString = fetchContentJson("services.json")
+        val wrapper = json.decodeFromString<ServicesWrapper>(jsonString)
+        wrapper.services
+    }
+
     suspend fun loadSocialLinks(): Result<List<SocialLink>> = runCatching {
         val jsonString = fetchContentJson("links.json")
         val wrapper = json.decodeFromString<SocialLinksWrapper>(jsonString)

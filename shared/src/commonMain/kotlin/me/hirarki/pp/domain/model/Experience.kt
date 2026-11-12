@@ -19,6 +19,9 @@ data class Experience(
         require(id.isNotBlank()) { "Experience id cannot be blank" }
         require(role.isNotBlank()) { "Role cannot be blank" }
         require(organization.isNotBlank()) { "Organization cannot be blank" }
+        require(startDate.isNotBlank()) { "Experience start date cannot be blank" }
+        require(achievements.all { it.isNotBlank() }) { "Experience achievements cannot be blank" }
+        require(technologies.all { it.isNotBlank() }) { "Experience technologies cannot be blank" }
     }
 }
 

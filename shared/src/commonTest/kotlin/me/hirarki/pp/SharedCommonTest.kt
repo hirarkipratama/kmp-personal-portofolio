@@ -2,8 +2,10 @@ package me.hirarki.pp
 
 import kotlinx.serialization.json.Json
 import me.hirarki.pp.domain.model.AboutContent
+import me.hirarki.pp.domain.model.Experience
 import me.hirarki.pp.domain.model.Project
 import me.hirarki.pp.domain.model.ProjectScreenshot
+import me.hirarki.pp.domain.model.Service
 import me.hirarki.pp.domain.model.SiteContent
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -124,6 +126,70 @@ class SharedCommonTest {
                 title = "Sample Project",
                 category = "Mobile application",
                 caseStudyUrl = "javascript:alert(1)"
+            )
+        }
+    }
+
+    @Test
+    fun serviceDecodesOptionalCapabilities() {
+        val service = Json.decodeFromString<Service>(
+            """
+            {
+              "id": "mobile-architecture",
+              "title": "Mobile architecture",
+              "description": "Architecture and implementation for mobile products."
+            }
+            """.trimIndent()
+        )
+
+        assertEquals(emptyList(), service.capabilities)
+    }
+
+    @Test
+    fun serviceRejectsBlankRequiredFieldsAndCapabilities() {
+        assertFailsWith<IllegalArgumentException> {
+            Service(
+                id = "mobile-architecture",
+                title = " ",
+                description = "Architecture and implementation."
+            )
+        }
+        assertFailsWith<IllegalArgumentException> {
+            Service(
+                id = "mobile-architecture",
+                title = "Mobile architecture",
+                description = "Architecture and implementation.",
+                capabilities = listOf(" ")
+            )
+        }
+    }
+
+    @Test
+    fun experienceRequiresStartDateAndNonBlankImpactAndTechnologyItems() {
+        assertFailsWith<IllegalArgumentException> {
+            Experience(
+                id = "experience",
+                role = "Mobile Developer",
+                organization = "Verified organization",
+                startDate = " "
+            )
+        }
+        assertFailsWith<IllegalArgumentException> {
+            Experience(
+                id = "experience",
+                role = "Mobile Developer",
+                organization = "Verified organization",
+                startDate = "2024",
+                achievements = listOf(" ")
+            )
+        }
+        assertFailsWith<IllegalArgumentException> {
+            Experience(
+                id = "experience",
+                role = "Mobile Developer",
+                organization = "Verified organization",
+                startDate = "2024",
+                technologies = listOf(" ")
             )
         }
     }

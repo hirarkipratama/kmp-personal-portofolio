@@ -41,11 +41,14 @@ import kotlinx.coroutines.launch
 import kotlinproject.shared.generated.resources.Res
 import kotlinproject.shared.generated.resources.profile
 import me.hirarki.pp.domain.model.AboutContent
+import me.hirarki.pp.domain.model.Experience
 import me.hirarki.pp.domain.model.Project
 import me.hirarki.pp.domain.model.ProjectScreenshot
+import me.hirarki.pp.domain.model.Service
 import me.hirarki.pp.domain.model.SiteContent
 import me.hirarki.pp.domain.model.SkillGroup
 import me.hirarki.pp.domain.model.SocialLink
+import me.hirarki.pp.domain.model.WorkMode
 import me.hirarki.pp.domain.repository.PortfolioRepository
 import me.hirarki.pp.domain.repository.loadProjectImage
 import me.hirarki.pp.openExternalUrl
@@ -77,6 +80,8 @@ private fun PortfolioContent() {
     val repository = remember { PortfolioRepository() }
     var siteContent by remember { mutableStateOf<SiteContent?>(null) }
     var projects by remember { mutableStateOf<List<Project>>(emptyList()) }
+    var services by remember { mutableStateOf<List<Service>>(emptyList()) }
+    var experience by remember { mutableStateOf<List<Experience>>(emptyList()) }
     var skillGroups by remember { mutableStateOf<List<SkillGroup>>(emptyList()) }
     var socialLinks by remember { mutableStateOf<List<SocialLink>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
@@ -85,11 +90,15 @@ private fun PortfolioContent() {
     LaunchedEffect(Unit) {
         val siteResult = repository.loadSiteContent()
         val projectsResult = repository.loadProjects()
+        val servicesResult = repository.loadServices()
+        val experienceResult = repository.loadExperience()
         val skillGroupsResult = repository.loadSkillGroups()
         val socialLinksResult = repository.loadSocialLinks()
 
         siteContent = siteResult.getOrNull()
         projects = projectsResult.getOrDefault(emptyList())
+        services = servicesResult.getOrDefault(emptyList())
+        experience = experienceResult.getOrDefault(emptyList())
         skillGroups = skillGroupsResult.getOrDefault(emptyList())
         socialLinks = socialLinksResult.getOrDefault(emptyList())
 
@@ -97,6 +106,8 @@ private fun PortfolioContent() {
         errorMessage = listOfNotNull(
             siteResult.exceptionOrNull()?.message,
             projectsResult.exceptionOrNull()?.message,
+            servicesResult.exceptionOrNull()?.message,
+            experienceResult.exceptionOrNull()?.message,
             skillGroupsResult.exceptionOrNull()?.message,
             socialLinksResult.exceptionOrNull()?.message
         ).firstOrNull()
@@ -144,6 +155,8 @@ private fun PortfolioContent() {
             PortfolioPage(
                 siteContent = siteContent!!,
                 projects = projects,
+                services = services,
+                experience = experience,
                 skillGroups = skillGroups,
                 socialLinks = socialLinks
             )
@@ -155,10 +168,12 @@ private fun PortfolioContent() {
 private fun PortfolioPage(
     siteContent: SiteContent,
     projects: List<Project>,
+    services: List<Service>,
+    experience: List<Experience>,
     skillGroups: List<SkillGroup>,
     socialLinks: List<SocialLink>
 ) {
-    val navItems = listOf("Overview", "Projects", "Skills", "Experience", "Contact")
+    val navItems = listOf("About", "Projects", "Services", "Experience", "Contact")
     val contentScrollState = rememberScrollState()
     val projectsRequester = remember { BringIntoViewRequester() }
     val coroutineScope = rememberCoroutineScope()
@@ -281,6 +296,42 @@ private fun PortfolioPage(
                                 }
                             }
                         }
+                }
+
+                Spacer(modifier = Modifier.height(PortfolioSpacing.xxl))
+            }
+
+            if (services.isNotEmpty()) {
+                SectionBlock(
+                    title = "Services & specializations",
+                    subtitle = "Selected mobile engineering capabilities",
+                    modifier = Modifier.fillMaxWidth().widthIn(max = PortfolioTokens.pageMaxWidth)
+                ) {
+                    services.chunked(if (compact) 1 else 2).forEach { serviceRow ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(PortfolioSpacing.medium)
+                        ) {
+                            serviceRow.forEach { service ->
+                                ServiceCard(service, Modifier.weight(1f))
+                            }
+                            if (!compact && serviceRow.size == 1) {
+                                Spacer(Modifier.weight(1f))
+                            }
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(PortfolioSpacing.xxl))
+            }
+
+            if (experience.isNotEmpty()) {
+                SectionBlock(
+                    title = "Engineering journey & experience",
+                    subtitle = "Roles, impact, and technologies",
+                    modifier = Modifier.fillMaxWidth().widthIn(max = PortfolioTokens.pageMaxWidth)
+                ) {
+                    ExperienceTimeline(experience, compact)
                 }
 
                 Spacer(modifier = Modifier.height(PortfolioSpacing.xxl))
@@ -753,6 +804,198 @@ private fun SectionBlock(
 
         content()
     }
+}
+
+@Composable
+private fun ServiceCard(
+    service: Service,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.92f),
+        shape = RoundedCornerShape(PortfolioRadius.large),
+        border = androidx.compose.foundation.BorderStroke(
+            1.dp,
+            MaterialTheme.colorScheme.outline.copy(alpha = 0.35f)
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(PortfolioSpacing.large),
+            verticalArrangement = Arrangement.spacedBy(PortfolioSpacing.medium)
+        ) {
+            Text(
+                text = service.title,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.semantics { heading() }
+            )
+            Text(
+                text = service.description,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            service.capabilities.forEach { capability ->
+                BulletText(capability)
+            }
+        }
+    }
+}
+
+@Composable
+private fun ExperienceTimeline(
+    experience: List<Experience>,
+    compact: Boolean
+) {
+    Column {
+        experience.forEachIndexed { index, item ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(PortfolioSpacing.small),
+                verticalAlignment = Alignment.Top
+            ) {
+                Box(
+                    modifier = Modifier.width(20.dp).height(20.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(10.dp)
+                            .background(
+                                MaterialTheme.colorScheme.primary,
+                                RoundedCornerShape(PortfolioRadius.full)
+                            )
+                    )
+                }
+                ExperienceCard(item, compact, Modifier.weight(1f))
+            }
+            if (index < experience.lastIndex) {
+                Row {
+                    Box(
+                        modifier = Modifier.width(20.dp).height(PortfolioSpacing.large),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .width(2.dp)
+                                .fillMaxHeight()
+                                .background(MaterialTheme.colorScheme.outline)
+                        )
+                    }
+                    Spacer(Modifier.width(PortfolioSpacing.small))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ExperienceCard(
+    experience: Experience,
+    compact: Boolean,
+    modifier: Modifier = Modifier
+) {
+    val workMode = experience.workMode?.displayName()
+    val location = experience.location?.takeIf(String::isNotBlank)
+        ?.takeUnless { it.equals(workMode, ignoreCase = true) }
+    val metadata = listOfNotNull(
+        experienceDateRange(experience),
+        location,
+        workMode
+    ).joinToString(" | ")
+
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.92f),
+        shape = RoundedCornerShape(PortfolioRadius.large),
+        border = androidx.compose.foundation.BorderStroke(
+            1.dp,
+            MaterialTheme.colorScheme.outline.copy(alpha = 0.35f)
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(PortfolioSpacing.large),
+            verticalArrangement = Arrangement.spacedBy(PortfolioSpacing.medium)
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(PortfolioSpacing.xs)) {
+                Text(
+                    text = experience.role,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.semantics { heading() }
+                )
+                Text(
+                    text = experience.organization,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+
+            Text(
+                text = metadata,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            experience.achievements.forEach { achievement ->
+                BulletText(achievement)
+            }
+
+            if (experience.technologies.isNotEmpty()) {
+                SkillTagFlow(experience.technologies, itemsPerRow = if (compact) 2 else 4)
+            }
+        }
+    }
+}
+
+@Composable
+private fun BulletText(text: String) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(PortfolioSpacing.small),
+        verticalAlignment = Alignment.Top
+    ) {
+        Box(
+            modifier = Modifier
+                .padding(top = 7.dp)
+                .size(5.dp)
+                .background(
+                    MaterialTheme.colorScheme.primary,
+                    RoundedCornerShape(PortfolioRadius.full)
+                )
+        )
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+private fun experienceDateRange(experience: Experience): String {
+    val endDate = when {
+        experience.current -> "Present"
+        !experience.endDate.isNullOrBlank() -> formatExperienceDate(experience.endDate)
+        else -> null
+    }
+    return listOfNotNull(formatExperienceDate(experience.startDate), endDate).joinToString(" - ")
+}
+
+private fun formatExperienceDate(value: String): String {
+    val dateParts = value.split('-')
+    if (dateParts.size != 2 || dateParts[0].length != 4) return value
+
+    val month = dateParts[1].toIntOrNull()?.takeIf { it in 1..12 } ?: return value
+    val monthNames = listOf(
+        "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+    )
+    return "${monthNames[month - 1]} ${dateParts[0]}"
+}
+
+private fun WorkMode.displayName(): String = when (this) {
+    WorkMode.REMOTE -> "Remote"
+    WorkMode.HYBRID -> "Hybrid"
+    WorkMode.ONSITE -> "On-site"
 }
 
 @Composable

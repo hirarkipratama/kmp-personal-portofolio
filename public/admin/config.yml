@@ -130,6 +130,23 @@ collections:
               - {label: "Achievements", name: "achievements", widget: "list", default: []}
               - {label: "Technologies", name: "technologies", widget: "list", default: []}
 
+  - name: "services"
+    label: "Services"
+    files:
+      - label: "Services and Specializations"
+        name: "services"
+        file: "content/services.json"
+        format: "json"
+        fields:
+          - label: "Services"
+            name: "services"
+            widget: "list"
+            fields:
+              - {label: "ID", name: "id", widget: "string"}
+              - {label: "Title", name: "title", widget: "string"}
+              - {label: "Description", name: "description", widget: "text"}
+              - {label: "Capabilities", name: "capabilities", widget: "list", required: false, default: []}
+
   - name: "links"
     label: "Social Links"
     files:
